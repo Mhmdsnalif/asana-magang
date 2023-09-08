@@ -27,6 +27,7 @@ export class AuthService {
     // tslint:disable-next-line: no-string-literal
     const { password, ...result } = user['dataValues'];
     return result;
+    
   }
 
   async login(user: User): Promise<{ user: User; token: string }> {
@@ -47,7 +48,10 @@ export class AuthService {
     const { repassword, ...userWithoutRepassword } = user;
 
     // create the user
-    const newUser = await this.userService.create({ ...userWithoutRepassword, password: pass });
+    const newUser = await this.userService.create({
+      ...userWithoutRepassword,
+      password: pass,
+    });
 
     // tslint:disable-next-line: no-string-literal
     const { password, ...result } = newUser['dataValues'];
@@ -57,6 +61,11 @@ export class AuthService {
 
     // return the user and the token
     return { user: result, token };
+  }
+
+  public async getDataUser() {
+    const getData = await this.userService.getDataUser();
+    return getData;
   }
 
   private async generateToken(user) {

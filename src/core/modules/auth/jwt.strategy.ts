@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     // cek jika user sudah memiliki token
-    const user = await this.userService.findOneById(payload.id);
+    const user = await this.userService.findOneById(payload.nip);
     if (!user) {
       throw new UnauthorizedException('Anda tidak terauthorisasi');
     }
