@@ -11,7 +11,26 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  private failedLoginAttempts = new Map<string, number>();
+
   async validateUser(username: string, pass: string) {
+    // Check if user has exceeded failed login attempts
+    if (
+      this.failedLoginAttempts.has(username) &&
+      this.failedLoginAttempts.get(username) >= 3
+    ) {
+      throw new BadRequestException(
+        'Anda telah mencapai batas login gagal. Tunggu beberapa saat sebelum mencoba lagi.',
+      );
+    }
+
+    // Set a timeout to clear failed login attempts
+    if (this.failedLoginAttempts.has(username)) {
+      setTimeout(() => {
+        this.failedLoginAttempts.delete(username);
+      }, 6000); // Clear attempts after 1 minute
+    }
+
     // find if user exist with this email
     const user = await this.userService.findOneByEmail(username);
     if (!user) {
@@ -21,13 +40,18 @@ export class AuthService {
     // find if user password match
     const match = await this.comparePassword(pass, user.password);
     if (!match) {
-      return null;
+      // Increment failed login attempts
+      const currentAttempts = this.failedLoginAttempts.get(username) || 0;
+      this.failedLoginAttempts.set(username, currentAttempts + 1);
+
+      throw new BadRequestException(
+        'Gagal masuk. Pastikan Anda Mengisi username dan password dengan benar.',
+      );
     }
 
-    // tslint:disable-next-line: no-string-literal
+
     const { password, ...result } = user['dataValues'];
     return result;
-    
   }
 
   async login(user: User): Promise<{ user: User; token: string }> {
@@ -67,6 +91,24 @@ export class AuthService {
     const getData = await this.userService.getDataUser();
     return getData;
   }
+
+  async updatePassword(userId: number, currentPassword: string, newPassword: string): Promise<void> {
+    // Temukan pengguna berdasarkan ID
+    const user = await this.userService.findOneById(userId);
+
+    // Memeriksa apakah kata sandi saat ini cocok
+    const isCurrentPasswordValid = await this.comparePassword(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new BadRequestException('Kata sandi saat ini salah.');
+    }
+
+    // Hash kata sandi yang baru
+    const hashedNewPassword = await this.hashPassword(newPassword);
+
+    // Simpan kata sandi yang baru ke dalam database
+    await this.userService.updatePassword(userId, hashedNewPassword);
+  }
+  
 
   private async generateToken(user) {
     const token = await this.jwtService.signAsync(user);

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { USER_REPOSITORY } from 'src/core/constants';
 import { User } from './User.entity';
 import { UserDto } from './user.dto';
@@ -22,4 +22,17 @@ export class UsersService {
     async getDataUser(): Promise<User[]>{
         return await this.userRepository.findAll<User>();
     }
+
+    async updatePassword(userId: number, newPassword: string) {
+        const user = await this.userRepository.findByPk(userId);
+      
+        if (!user) {
+          throw new NotFoundException(`User with ID ${userId} not found`);
+        }
+      
+        // Update the user's password
+        user.password = newPassword;
+        await user.save();
+      }
+      
 }

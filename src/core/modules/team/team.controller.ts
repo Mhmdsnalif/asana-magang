@@ -1,13 +1,5 @@
 import {
-  Controller,
-  Get,
-  Param,
-  Post,
-  Request,
-  Body,
-  UseGuards,
-  NotFoundException,
-} from '@nestjs/common';
+  Controller,Get,Delete, Param,Post,Request,Body,UseGuards,NotFoundException} from '@nestjs/common';
 import { TeamService } from './team.service';
 import { Team as TeamEntity } from './team.entity';
 import { Member as MemberEntity } from '../member/member.entity';
@@ -29,6 +21,20 @@ export class TeamController {
   @Get('/all')
   async findall() {
     return await this.teamService.findall();
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('by-user/:userId')
+  async findByUserId(@Param('userId') userId: number): Promise<TeamEntity[]> {
+    try {
+      const teams = await this.teamService.findByUserId(userId);
+      return teams;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -57,4 +63,48 @@ export class TeamController {
       throw error;
     }
   }
+
+@Get(':idTim/members')
+async findMembersByTeamId(@Param('idTim') idTim: number): Promise<MemberEntity[]> {
+  try {
+    const members = await this.teamService.findMembersByTeamId(idTim);
+    return members;
+  } catch (error) {
+    if (error instanceof NotFoundException) {
+      throw new NotFoundException(error.message);
+    }
+    throw error;
+  }
+}
+
+@UseGuards(AuthGuard('jwt'))
+@Delete(':idTim/members/:nip')
+async deleteMember(
+  @Param('idTim') idTim: number,
+  @Param('nip') nip: number
+): Promise<void> {
+  try {
+    await this.teamService.deleteMember(idTim, nip);
+  } catch (error) {
+    if (error instanceof NotFoundException) {
+      throw new NotFoundException(error.message);
+    }
+    throw error;
+  }
+}
+
+@UseGuards(AuthGuard('jwt'))
+@Delete(':idTim')
+async deleteTeam(@Param('idTim') idTim: number): Promise<void> {
+  try {
+    await this.teamService.deleteTeam(idTim);
+  } catch (error) {
+    if (error instanceof NotFoundException) {
+      throw new NotFoundException(error.message);
+    }
+    throw error;
+  }
+}
+
+
 }

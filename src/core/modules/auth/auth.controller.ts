@@ -5,6 +5,8 @@ import {
   Post,
   UseGuards,
   Get,
+  Put,
+  Param,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -18,7 +20,12 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   @Post('/login')
   async login(@Request() req) {
-    return await this.authService.login(req.user);
+    try {
+      const result = await this.authService.login(req.user);
+      return result;
+    } catch (error) {
+      return { message: error.message, statusCode: error.status };
+    }
   }
 
   @UseGuards(DoesUserExist)
@@ -31,4 +38,15 @@ export class AuthController {
   async getDataUser(@Request() req) {
     return await this.authService.getDataUser();
   }
+
+  @Put('/update-password/:userId')
+  async updatePassword(
+    @Param('userId') userId: number,
+    @Body('currentPassword') currentPassword: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    await this.authService.updatePassword(userId, currentPassword, newPassword);
+    return { message: 'Password updated successfully' };
+  }
+  
 }

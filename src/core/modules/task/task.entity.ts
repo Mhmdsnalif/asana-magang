@@ -2,41 +2,68 @@ import {
   Table,
   Column,
   Model,
-  DataType,
   ForeignKey,
   BelongsTo,
+  DataType,
 } from 'sequelize-typescript';
-import { Status } from './project.enum';
 import { Team } from '../team/team.entity';
+import { Member } from '../member/member.entity';
+import { Status } from './status.enum';
 
 @Table
-export class Project extends Model<Project> {
+export class Task extends Model<Task> {
   @Column({
     type: DataType.INTEGER,
     primaryKey: true,
     autoIncrement: true,
     allowNull: false,
   })
-  idProject: number;
+  id: number;
+
+  @ForeignKey(() => Team)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  teamId: number;
+
+  @BelongsTo(() => Team)
+  team: Team;
+
+  @ForeignKey(() => Member)
+  @Column({
+    type: DataType.BIGINT,
+    allowNull: false,
+  })
+  memberId: number;
+
+  @BelongsTo(() => Member)
+  member: Member;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  projectName: string;
+  taskName: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  forMember: number;
 
   @Column({
     type: DataType.DATE,
     allowNull: true,
   })
   startDate: Date;
-
+  
   @Column({
     type: DataType.DATE,
     allowNull: true,
   })
   endDate: Date;
-
+  
   @Column({
     type: DataType.STRING,
     allowNull: true,
@@ -50,13 +77,5 @@ export class Project extends Model<Project> {
   })
   status: Status;
 
-  @ForeignKey(() => Team) // Menunjukkan foreign key ke model Team
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false, // Tidak boleh null
-  })
-  idTim: number;
-
-  @BelongsTo(() => Team) // Menunjukkan hubungan belongs to ke model Team
-  team: Team; // Ini akan menjadi referensi ke objek Team yang terkait
+  // Kolom-kolom tambahan seperti peran atau tanggal bergabung
 }
