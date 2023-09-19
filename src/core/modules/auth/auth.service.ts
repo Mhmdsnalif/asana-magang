@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -49,7 +53,6 @@ export class AuthService {
       );
     }
 
-
     const { password, ...result } = user['dataValues'];
     return result;
   }
@@ -92,12 +95,19 @@ export class AuthService {
     return getData;
   }
 
-  async updatePassword(userId: number, currentPassword: string, newPassword: string): Promise<void> {
+  async updatePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
     // Temukan pengguna berdasarkan ID
     const user = await this.userService.findOneById(userId);
 
     // Memeriksa apakah kata sandi saat ini cocok
-    const isCurrentPasswordValid = await this.comparePassword(currentPassword, user.password);
+    const isCurrentPasswordValid = await this.comparePassword(
+      currentPassword,
+      user.password,
+    );
     if (!isCurrentPasswordValid) {
       throw new BadRequestException('Kata sandi saat ini salah.');
     }
@@ -108,7 +118,41 @@ export class AuthService {
     // Simpan kata sandi yang baru ke dalam database
     await this.userService.updatePassword(userId, hashedNewPassword);
   }
-  
+
+  // auth.service.ts
+
+  async updateUser(
+    userId: number,
+    updatedUserData: Partial<User>,
+  ): Promise<User> {
+    // Temukan pengguna berdasarkan ID
+    const user = await this.userService.findOneById(userId);
+
+    // Jika pengguna tidak ditemukan, lempar NotFoundException
+    if (!user) {
+      throw new NotFoundException(
+        `Pengguna dengan ID ${userId} tidak ditemukan`,
+      );
+    }
+
+    // Jika ada upaya untuk mengubah email, periksa apakah email sudah digunakan oleh pengguna lain
+    if (updatedUserData.email && updatedUserData.email !== user.email) {
+      const existingUserWithSameEmail = await this.userService.findOneByEmail(
+        updatedUserData.email,
+      );
+
+      if (existingUserWithSameEmail) {
+        throw new BadRequestException(
+          'Email sudah digunakan oleh pengguna lain',
+        );
+      }
+    }
+    // Update data pengguna kecuali kata sandi
+    Object.assign(user, { ...updatedUserData, password: user.password });
+
+    // Simpan perubahan ke dalam database
+    return await user.save();
+  }
 
   private async generateToken(user) {
     const token = await this.jwtService.signAsync(user);

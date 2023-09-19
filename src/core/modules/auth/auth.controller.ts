@@ -7,6 +7,9 @@ import {
   Get,
   Put,
   Param,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -48,5 +51,28 @@ export class AuthController {
     await this.authService.updatePassword(userId, currentPassword, newPassword);
     return { message: 'Password updated successfully' };
   }
+
+  // auth.controller.ts
+
+@Put('/update-user/:userId')
+async updateUser(
+  @Param('userId') userId: number,
+  @Body() updateUserDto: Partial<UserDto>,
+) {
+  try {
+    // Panggil metode updateUser dari service
+    const updatedUser = await this.authService.updateUser(userId, updateUserDto);
+
+    // Jika pembaruan berhasil, kembalikan data pengguna yang diperbarui
+    return { message: 'User updated successfully', user: updatedUser };
+  } catch (error) {
+    if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      throw error;
+    }
+    throw new InternalServerErrorException('Terjadi kesalahan dalam mengupdate pengguna.');
+  }
+}
+
+  
   
 }

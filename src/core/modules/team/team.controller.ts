@@ -1,5 +1,14 @@
 import {
-  Controller,Get,Delete, Param,Post,Request,Body,UseGuards,NotFoundException} from '@nestjs/common';
+  Controller,
+  Get,
+  Delete,
+  Param,
+  Post,
+  Request,
+  Body,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
 import { TeamService } from './team.service';
 import { Team as TeamEntity } from './team.entity';
 import { Member as MemberEntity } from '../member/member.entity';
@@ -11,6 +20,7 @@ import { MemberDTO } from '../member/member.dto';
 export class TeamController {
   constructor(private readonly teamService: TeamService) {}
 
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   async findAll() {
     // Dapatkan semua tim dalam database
@@ -64,47 +74,47 @@ export class TeamController {
     }
   }
 
-@Get(':idTim/members')
-async findMembersByTeamId(@Param('idTim') idTim: number): Promise<MemberEntity[]> {
-  try {
-    const members = await this.teamService.findMembersByTeamId(idTim);
-    return members;
-  } catch (error) {
-    if (error instanceof NotFoundException) {
-      throw new NotFoundException(error.message);
+  @Get(':idTim/members')
+  async findMembersByTeamId(
+    @Param('idTim') idTim: number,
+  ): Promise<MemberEntity[]> {
+    try {
+      const members = await this.teamService.findMembersByTeamId(idTim);
+      return members;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
     }
-    throw error;
   }
-}
 
-@UseGuards(AuthGuard('jwt'))
-@Delete(':idTim/members/:nip')
-async deleteMember(
-  @Param('idTim') idTim: number,
-  @Param('nip') nip: number
-): Promise<void> {
-  try {
-    await this.teamService.deleteMember(idTim, nip);
-  } catch (error) {
-    if (error instanceof NotFoundException) {
-      throw new NotFoundException(error.message);
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':idTim/members/:nip')
+  async deleteMember(
+    @Param('idTim') idTim: number,
+    @Param('nip') nip: number,
+  ): Promise<void> {
+    try {
+      await this.teamService.deleteMember(idTim, nip);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
     }
-    throw error;
   }
-}
 
-@UseGuards(AuthGuard('jwt'))
-@Delete(':idTim')
-async deleteTeam(@Param('idTim') idTim: number): Promise<void> {
-  try {
-    await this.teamService.deleteTeam(idTim);
-  } catch (error) {
-    if (error instanceof NotFoundException) {
-      throw new NotFoundException(error.message);
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':idTim')
+  async deleteTeam(@Param('idTim') idTim: number): Promise<void> {
+    try {
+      await this.teamService.deleteTeam(idTim);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
     }
-    throw error;
   }
-}
-
-
 }
