@@ -14,7 +14,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { UserDto } from '../../modules/users/user.dto';
-import { DoesUserExist } from 'src/core/guards/UserExist.guard';
+import { UserExistGuard } from 'src/core/guards/UserExist.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -31,17 +31,19 @@ export class AuthController {
     }
   }
 
-  @UseGuards(DoesUserExist)
-  @Post('/signup')
+  @UseGuards(UserExistGuard)
+  @Post('/user')
   async create(@Body() user: UserDto) {
     return await this.authService.create(user);
   }
 
-  @Get('/signup')
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/user')
   async getDataUser(@Request() req) {
     return await this.authService.getDataUser();
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Put('/update-password/:userId')
   async updatePassword(
     @Param('userId') userId: number,
@@ -54,25 +56,31 @@ export class AuthController {
 
   // auth.controller.ts
 
-@Put('/update-user/:userId')
-async updateUser(
-  @Param('userId') userId: number,
-  @Body() updateUserDto: Partial<UserDto>,
-) {
-  try {
-    // Panggil metode updateUser dari service
-    const updatedUser = await this.authService.updateUser(userId, updateUserDto);
+  @UseGuards(AuthGuard('jwt'))
+  @Put('/update-user/:userId')
+  async updateUser(
+    @Param('userId') userId: number,
+    @Body() updateUserDto: Partial<UserDto>,
+  ) {
+    try {
+      // Panggil metode updateUser dari service
+      const updatedUser = await this.authService.updateUser(
+        userId,
+        updateUserDto,
+      );
 
-    // Jika pembaruan berhasil, kembalikan data pengguna yang diperbarui
-    return { message: 'User updated successfully', user: updatedUser };
-  } catch (error) {
-    if (error instanceof NotFoundException || error instanceof BadRequestException) {
-      throw error;
+      // Jika pembaruan berhasil, kembalikan data pengguna yang diperbarui
+      return { message: 'User updated successfully', user: updatedUser };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Terjadi kesalahan dalam mengupdate pengguna.',
+      );
     }
-    throw new InternalServerErrorException('Terjadi kesalahan dalam mengupdate pengguna.');
   }
-}
-
-  
-  
 }

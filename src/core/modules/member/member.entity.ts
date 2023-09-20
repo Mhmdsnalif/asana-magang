@@ -11,13 +11,6 @@ import { User } from '../users/user.entity';
 
 @Table
 export class Member extends Model<Member> {
-  @Column({
-    type: DataType.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-    allowNull: false,
-  })
-  id: number;
 
   @ForeignKey(() => Team)
   @Column({

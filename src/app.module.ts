@@ -7,7 +7,6 @@ import { ProjectModule } from './core/modules/project/project.module';
 import { TeamModule } from './core/modules/team/team.module';
 import { MemberModule } from './core/modules/member/member.module';
 import { TaskModule } from './core/modules/task/task.module';
-import { SubtaskModule } from './core/modules/subtask/subtask.module';
 
 @Module({
   imports: [
@@ -19,7 +18,6 @@ import { SubtaskModule } from './core/modules/subtask/subtask.module';
     TeamModule,
     MemberModule,
     TaskModule,
-    SubtaskModule,
   ],
   
 })

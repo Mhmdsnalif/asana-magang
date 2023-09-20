@@ -1,34 +1,83 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Delete,
+  Put,
+  Param,
+  ParseIntPipe,
+  NotFoundException,
+  UseGuards,
+} from '@nestjs/common';
 import { TaskService } from './task.service';
 import { TaskDto } from './task.dto';
 import { Task } from './task.entity';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('tasks')
-export class TaskController {
+export default class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
-  @Post()
-  async create(@Body() taskDto: TaskDto): Promise<Task> {
-    return await this.taskService.create(taskDto);
+  @UseGuards(AuthGuard('jwt'))
+  @Post(':teamId/:memberId/:projectId')
+  async create(
+    @Body() taskDto: TaskDto,
+    @Param('teamId', ParseIntPipe) teamId: number,
+    @Param('memberId', ParseIntPipe) memberId: number,
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Body('forUser') forUser: string,
+  ): Promise<{ message: string; data?: Task } | { message: string }> {
+    try {
+      const createdTask = await this.taskService.create(
+        taskDto,
+        teamId,
+        memberId,
+        projectId,
+        forUser,
+      );
+      return { message: 'Task created successfully', data: createdTask };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return { message: error.message };
+      }
+    }
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   async findAll(): Promise<Task[]> {
     return await this.taskService.findAll();
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  async findById(@Param('id') id: number): Promise<Task> {
+  async findById(@Param('id', ParseIntPipe) id: number): Promise<Task> {
     return await this.taskService.findById(id);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Put(':id')
-  async update(@Param('id') id: number, @Body() taskDto: TaskDto): Promise<Task> {
-    return await this.taskService.update(id, taskDto);
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() taskDto: TaskDto,
+  ) {
+    try {
+      const updatedTask = await this.taskService.update(id, taskDto);
+      return { message: 'Task updated successfully', data: updatedTask };
+    } catch (error) {
+      return { message: 'Failed to update task', error: error.message };
+    }
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
-  async delete(@Param('id') id: number): Promise<void> {
-    return await this.taskService.delete(id);
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    try {
+      await this.taskService.delete(id);
+      return { message: 'Task deleted successfully' };
+    } catch (error) {
+      return { message: 'Failed to delete task', error: error.message };
+    }
   }
 }

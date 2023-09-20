@@ -6,7 +6,6 @@ import { Team } from "../modules/team/team.entity";
 import { Member } from "../modules/member/member.entity";
 import { Task } from "../modules/task/task.entity";
 import { Project } from "../modules/project/project.entity";
-import { SubTask } from "../modules/subtask/subtask.entity";
 
 export const databaseProviders = [{
     provide: SEQUELIZE,
@@ -26,7 +25,7 @@ export const databaseProviders = [{
            config = databaseConfig.development;
         }
         const sequelize = new Sequelize(config);
-        sequelize.addModels([User, Team, Member, Task, Project, SubTask]);
+        sequelize.addModels([User, Team, Member, Task, Project]);
         await sequelize.sync();
         return sequelize;
     },

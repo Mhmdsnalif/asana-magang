@@ -54,16 +54,31 @@ export class ProjectService {
     return project;
   }
 
-  update(id: number, projectDto: ProjectDto): Project {
-    const project = this.findById(id);
-    // Di sini, Anda bisa menambahkan logika untuk memperbarui proyek
-    // dan kolom idTim sesuai kebutuhan
-    return project;
-  }
+  update(id: number, projectDto: ProjectDto): Promise<Project> {
+    // Temukan proyek berdasarkan id
+    return this.projectRepository.findByPk(id)
+      .then(async (project) => {
+        if (!project) {
+          throw new NotFoundException(`Project with ID ${id} not found`);
+        }
+        // Di sini, Anda bisa menambahkan logika untuk memperbarui proyek
+        // dan kolom idTim sesuai kebutuhan
+        // Misalnya:
+        await project.update({
+          ...projectDto,
+        });
+        return project;
+      });
+}
 
-  delete(id: number): void {
-    const project = this.findById(id);
-    // Di sini, Anda bisa menambahkan logika untuk menghapus proyek
-    // sesuai kebutuhan Anda
-  }
+async delete(id: number): Promise<void> {
+    // Temukan proyek berdasarkan id
+    const project = await this.projectRepository.findByPk(id);
+    if (!project) {
+      throw new NotFoundException(`Project with ID ${id} not found`);
+    }
+    // Hapus proyek
+    await project.destroy();
+}
+
 }

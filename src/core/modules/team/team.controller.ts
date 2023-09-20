@@ -28,12 +28,6 @@ export class TeamController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/all')
-  async findall() {
-    return await this.teamService.findall();
-  }
-
-  @UseGuards(AuthGuard('jwt'))
   @Get('by-user/:userId')
   async findByUserId(@Param('userId') userId: number): Promise<TeamEntity[]> {
     try {
@@ -74,6 +68,7 @@ export class TeamController {
     }
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get(':idTim/members')
   async findMembersByTeamId(
     @Param('idTim') idTim: number,

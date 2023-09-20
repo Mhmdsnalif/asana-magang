@@ -7,7 +7,7 @@ export class MemberDTO {
   
   readonly userId: number;
 
-  memberId: number;
+  readonly memberId: number;
 
 
   // Kolom-kolom tambahan seperti peran atau tanggal bergabung
