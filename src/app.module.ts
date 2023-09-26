@@ -6,7 +6,7 @@ import { UsersModule } from './core/modules/users/users.module';
 import { ProjectModule } from './core/modules/project/project.module';
 import { TeamModule } from './core/modules/team/team.module';
 import { MemberModule } from './core/modules/member/member.module';
-import { TaskModule } from './core/modules/task/task.module';
+
 
 @Module({
   imports: [
