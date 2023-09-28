@@ -168,4 +168,17 @@ export class AuthService {
     const match = await bcrypt.compare(enteredPassword, dbPassword);
     return match;
   }
+
+  async findByNip(nip: number): Promise<User | null> {
+    // Cari pengguna berdasarkan NIP menggunakan layanan UsersService
+    const user = await this.userService.findOneById(nip);
+
+    if (!user) {
+      throw new NotFoundException(`Pengguna dengan NIP ${nip} tidak ditemukan`);
+    }
+    const { password, ...userWithoutPassword } = user;
+
+
+    return user;
+  }
 }

@@ -17,7 +17,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('API TPS PLAN')
     .setDescription('API Documentation')
-    .setVersion('1.0')
+    .setVersion('3.0.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

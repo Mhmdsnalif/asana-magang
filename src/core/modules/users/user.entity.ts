@@ -1,4 +1,5 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { UserRole } from './user.dto';
 
 @Table
 export class User extends Model<User> {
@@ -34,10 +35,10 @@ export class User extends Model<User> {
   })
   password: string;
 
-  // @Column({
-  //     type: DataType.ENUM,
-  //     values: ['male', 'female'],
-  //     allowNull: false,
-  // })
-  // gender: string;
+  @Column({
+    type: DataType.ENUM,
+    values: Object.values(UserRole),
+    defaultValue: UserRole.USER,
+  })
+  role : UserRole;
 }

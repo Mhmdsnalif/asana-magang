@@ -13,8 +13,11 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { UserDto } from '../../modules/users/user.dto';
-import { UserExistGuard } from 'src/core/guards/UserExist.guard';
+import { UserDto, UserRole } from '../../modules/users/user.dto';
+import { DoesUserExist } from 'src/core/guards/UserExist.guard';
+import { hasRoles } from './decorators/roles.decorators';
+import { RolesGuard } from 'src/core/guards/roles.guard';
+import { ApiParam } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +25,8 @@ export class AuthController {
 
   @UseGuards(AuthGuard('local'))
   @Post('/login')
+  @ApiParam({ name: 'username', description: 'Username', type: 'string' })
+  @ApiParam({ name: 'password', description: 'Password', type: 'string' })
   async login(@Request() req) {
     try {
       const result = await this.authService.login(req.user);
@@ -31,13 +36,39 @@ export class AuthController {
     }
   }
 
-  @UseGuards(UserExistGuard)
-  @Post('/user')
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/user/by-nip/:nip')
+  async getUserByNip(@Param('nip') nip: number) {
+    try {
+      // Panggil metode findByNip dari AuthService untuk mencari pengguna berdasarkan NIP
+      const user = await this.authService.findByNip(nip);
+
+      // Kembalikan data pengguna yang ditemukan
+      return user;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new NotFoundException(
+        'Terjadi kesalahan dalam mencari data pengguna berdasarkan NIP.',
+      );
+    }
+  }
+
+  @hasRoles(UserRole.SUPERADMIN)
+  @UseGuards(AuthGuard('jwt'), RolesGuard, DoesUserExist)
+  @ApiParam({ name: 'nip', description: 'NIP', type: 'number' })
+  @ApiParam({ name: 'name', description: 'Name', type: 'string' })
+  @ApiParam({ name: 'email', description: 'Email', type: 'string' })
+  @ApiParam({ name: 'password', description: 'Password', type: 'string' })
+  @ApiParam({ name: 'role', description: 'Role', type: 'enum' })
+  @Post('/signup')
   async create(@Body() user: UserDto) {
     return await this.authService.create(user);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @hasRoles(UserRole.SUPERADMIN, UserRole.ADMIN)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get('/user')
   async getDataUser(@Request() req) {
     return await this.authService.getDataUser();
@@ -53,8 +84,6 @@ export class AuthController {
     await this.authService.updatePassword(userId, currentPassword, newPassword);
     return { message: 'Password updated successfully' };
   }
-
-  // auth.controller.ts
 
   @UseGuards(AuthGuard('jwt'))
   @Put('/update-user/:userId')

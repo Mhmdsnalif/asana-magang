@@ -7,7 +7,6 @@ import { teamsProviders } from '../team/team.providers';
 import { projectProviders } from '../project/project.providers';
 
 @Module({
-  // imports: [SequelizeModule.forFeature([Task])], // Mengimpor model Task ke modul
   controllers: [TaskController],
   providers: [
     TaskService,

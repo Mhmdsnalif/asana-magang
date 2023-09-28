@@ -24,16 +24,10 @@ export class Task extends Model<Task> {
   forUser: string;
 
   @Column({
-    type: DataType.DATE,
+    type: DataType.STRING,
     allowNull: true,
   })
-  startDate: Date;
-
-  @Column({
-    type: DataType.DATE,
-    allowNull: true,
-  })
-  endDate: Date;
+  dueDate: string;
 
   @Column({
     type: DataType.STRING,

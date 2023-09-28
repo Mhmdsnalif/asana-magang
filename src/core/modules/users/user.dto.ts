@@ -19,4 +19,12 @@ export class UserDto {
   @IsNotEmpty({ message: 'Password tidak boleh kosong' })
   @MinLength(6, { message: 'Password harus memiliki setidaknya 6 karakter' })
    password: string;
+
+   role?: UserRole;
+}
+
+export enum UserRole {
+  SUPERADMIN = 'Super Admin',
+  ADMIN = 'Admin',
+  USER = 'User',
 }

@@ -8,6 +8,7 @@ import {
 } from 'sequelize-typescript';
 import { Team } from '../team/team.entity';
 import { User } from '../users/user.entity';
+import { UserRole } from '../users/user.dto';
 
 @Table
 export class Member extends Model<Member> {
@@ -32,5 +33,10 @@ export class Member extends Model<Member> {
   @BelongsTo(() => User)
   user: User;
 
-  // Kolom-kolom tambahan seperti peran atau tanggal bergabung
+  // @Column({
+  //   type: DataType.ENUM,
+  //   values: Object.values(UserRole),
+  //   defaultValue: UserRole.USER,
+  // })
+  // role : UserRole;
 }
