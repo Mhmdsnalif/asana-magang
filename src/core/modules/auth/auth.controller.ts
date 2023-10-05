@@ -6,10 +6,12 @@ import {
   UseGuards,
   Get,
   Put,
+  Delete,
   Param,
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -110,6 +112,46 @@ export class AuthController {
       throw new InternalServerErrorException(
         'Terjadi kesalahan dalam mengupdate pengguna.',
       );
+    }
+  }
+
+  @Delete('user/:nip')
+  async deleteUser(
+    @Param('nip', ParseIntPipe) nip: number,
+  ): Promise<{ message: string }> {
+    await this.authService.deleteUser(nip);
+    return { message: 'Data berhasil dihapus' };
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    try {
+      await this.authService.forgotPassword(email);
+      return 'Password reset email sent successfully';
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return 'Email is not associated with a user.';
+      }
+      throw error;
+    }
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body('email') email: string,
+    @Body('token') token: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    try {
+      await this.authService.resetPassword(email, token, newPassword);
+      return 'Password reset successfully';
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return 'Email is not associated with a user.';
+      } else if (error instanceof BadRequestException) {
+        return 'Invalid token or new password.';
+      }
+      throw error;
     }
   }
 }

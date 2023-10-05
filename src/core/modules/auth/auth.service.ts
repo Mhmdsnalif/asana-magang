@@ -7,13 +7,50 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/User.entity';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService, // Injeksi MailService
+
   ) {}
+
+  async forgotPassword(email: string) {
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Email is not associated with a user.');
+    }
+
+    const token = Math.floor(1000 + Math.random() * 9000).toString();
+    await this.mailService.sendForgotPasswordEmail(email, token);
+    // Optionally, you can save the token to the user entity here.
+
+    return 'Password reset email sent successfully';
+  }
+
+  async resetPassword(email: string, token: string, newPassword: string) {
+    // Optionally, you can verify the token here if it's saved in the user entity.
+
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Email is not associated with a user.');
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password in the database
+    user.password = hashedPassword;
+    await user.save();
+
+    // Optionally, you can invalidate or remove the token here if it's saved in the user entity.
+
+    return 'Password reset successfully';
+  }
+  
 
   private failedLoginAttempts = new Map<string, number>();
 
@@ -120,6 +157,16 @@ export class AuthService {
   }
 
   // auth.service.ts
+  async deleteUser(userNip: number): Promise<void> {
+    const user = await this.userService.findOneById(userNip);
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userNip} not found`);
+    }
+
+    // Hapus pengguna dari layanan pengguna
+    await this.userService.deleteUser(userNip);
+  }
 
   async updateUser(
     userId: number,
