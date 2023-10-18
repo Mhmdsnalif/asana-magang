@@ -25,10 +25,10 @@ export class Member extends Model<Member> {
 
   @ForeignKey(() => User)
   @Column({
-    type: DataType.BIGINT,
+    type: DataType.STRING,
     allowNull: false,
   })
-  userId: number;
+  userId: string;
 
   @BelongsTo(() => User)
   user: User;

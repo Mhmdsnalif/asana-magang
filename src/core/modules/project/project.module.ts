@@ -8,11 +8,13 @@ import { UsersService } from '../users/users.service';
 import { userProviders } from '../users/users.providers';
 import { AuthService } from '../auth/auth.service';
 import { MailService } from '../mail/mail.service';
+import { UploadService } from 'src/core/upload/upload.service';
+import { uploadProviders } from 'src/core/upload/upload.providers';
 
 @Module({
   controllers: [ProjectController],
   providers: [ProjectService, ...projectProviders, ...teamsProviders, 
     //Add Roles//
-    JwtService, UsersService, ...userProviders, AuthService, MailService],
+    JwtService, UsersService, ...userProviders, AuthService, MailService, UploadService, ...uploadProviders],
 })
 export class ProjectModule {}

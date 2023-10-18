@@ -9,6 +9,8 @@ import { AuthService } from './auth.service';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { JwtAuthGuard } from 'src/core/guards/jwt-auth.guard';
 import { MailModule } from '../mail/mail.module';
+import { UploadService } from 'src/core/upload/upload.service';
+import { uploadProviders } from 'src/core/upload/upload.providers';
 
 @Module({
   imports: [
@@ -21,7 +23,7 @@ import { MailModule } from '../mail/mail.module';
       signOptions: { expiresIn: process.env.TOKEN_EXPIRATION },
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, RolesGuard, JwtAuthGuard],
+  providers: [AuthService, LocalStrategy, JwtStrategy, RolesGuard, JwtAuthGuard, UploadService, UploadService,...uploadProviders],
   controllers: [AuthController],
 })
 export class AuthModule {}

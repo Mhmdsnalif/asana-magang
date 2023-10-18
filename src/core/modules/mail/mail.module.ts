@@ -13,8 +13,8 @@ import { join } from 'path';
         host: 'smtp.gmail.com',
         // secure: false,
         auth: {
-          user: 'muhammadsna0109@gmail.com',
-          pass: 'xbarsdmosotqqcos',
+          user: 'ittsmagangtpsplan@gmail.com',
+          pass: 'pnkzigdkvtpumpne',
         },
       },
       defaults: {
@@ -23,6 +23,6 @@ import { join } from 'path';
     }),
   ],
   providers: [MailService],
-  exports: [MailService], 
+  exports: [MailService],
 })
 export class MailModule {}

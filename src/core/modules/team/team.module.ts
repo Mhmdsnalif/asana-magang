@@ -8,9 +8,22 @@ import { UsersService } from '../users/users.service';
 import { userProviders } from '../users/users.providers';
 import { AuthService } from '../auth/auth.service';
 import { MailService } from '../mail/mail.service';
+import { UploadService } from 'src/core/upload/upload.service';
+import { uploadProviders } from 'src/core/upload/upload.providers';
 
 @Module({
   controllers: [TeamController],
-  providers: [TeamService, ...teamsProviders, ...memberProviders, JwtService, UsersService, ...userProviders, AuthService, MailService ],
+  providers: [
+    TeamService,
+    ...teamsProviders,
+    ...memberProviders,
+    JwtService,
+    UsersService,
+    ...userProviders,
+    AuthService,
+    MailService,
+    UploadService,
+    ...uploadProviders
+  ],
 })
 export class TeamModule {}

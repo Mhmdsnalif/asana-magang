@@ -1,14 +1,15 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
-import { UserRole } from './user.dto';
+import { Table, Column, Model, DataType, HasOne } from 'sequelize-typescript';
+import { UserRole, UserStatus } from './user.dto';
+import { DatabaseFile } from 'src/core/upload/entities/upload.entity';
 
 @Table
 export class User extends Model<User> {
   @Column({
-    type: DataType.BIGINT,
+    type: DataType.STRING,
     allowNull: false,
     primaryKey: true
   })
-  nip: number;
+  nip: string;
 
   @Column({
     type: DataType.STRING,
@@ -41,4 +42,24 @@ export class User extends Model<User> {
     defaultValue: UserRole.USER,
   })
   role : UserRole;
+
+  @Column({
+    type: DataType.ENUM,
+    values: Object.values(UserStatus),
+    defaultValue: UserStatus.Active,
+    allowNull: true,
+  })
+  status: UserStatus;
+
+  
+  @Column({
+    type: DataType.STRING, // Kolom untuk menyimpan waktu kedaluwarsa reset password
+    allowNull: true, // Diizinkan untuk bernilai null jika reset password tidak aktif
+  })
+  resetPasswordExpires: string;
+
+  @HasOne(() => DatabaseFile)
+  avatar: DatabaseFile;
+
+
 }
